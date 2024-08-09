@@ -114,7 +114,7 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
         style={{width: 600}}
         onChange={(t) => {setTextInput(t.target.value)} }/>
     </Row>
-       <p>{blob? blob.url : null}</p>
+       <p>blob url: {blob? blob.url : null}</p>
      <Row>
       {blob ? (
       <>

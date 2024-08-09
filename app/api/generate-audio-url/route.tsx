@@ -4,6 +4,7 @@ import { TextToSpeechRequest } from "elevenlabs/api";
 import { put } from '@vercel/blob';
 import { v4 } from 'uuid';
 import { NextResponse } from "next/server";
+import { createWriteStream } from "fs";
 
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -23,17 +24,13 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const voiceId = requestBody.voiceId;
   const text = requestBody.text;
-  const uuid: string = v4()
+  const fileName = `${v4()}.mp3`;
 
   const t2sRequest: TextToSpeechRequest = {text: text, model_id: "eleven_multilingual_v2",}
 
   const response = await client.textToSpeech.convert(voiceId, t2sRequest)
 
-  const audioData = await response.read()
-  const jsBlob = new Blob([audioData], { type: "audio/mp3" });
-
-
-  const blob = await put(`${uuid}.mp3`, jsBlob, {
+  const blob = await put(fileName, response, {
     access: 'public',
   });
 
