@@ -4,7 +4,7 @@ import { Divider, Input, Row, Table, TableColumnsType } from "antd";
 import React, { ReactElement, useState } from "react";
 import { ElevenLabs } from "elevenlabs";
 import { PutBlobResult } from "@vercel/blob";
-import { generateColumns } from "./generateColumns";
+import { generateColumns } from "./columns/generateColumns";
 
 interface VoiceTableProps {
   dataSource: ElevenLabs.Voice[]
@@ -58,13 +58,9 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
        {blob && (<p>blob url: {blob? blob.url : null}</p>)}
      <Row>
       {blob ? (
-      <>
-        <div>
-          <audio controls>
-            <source id="audioSource" type="audio/mp3" src={blob?.url} />
-          </audio>
-        </div>
-      </>
+        <audio controls>
+          <source id="audioSource" type="audio/mp3" src={blob?.url} />
+        </audio>
     ) : "waiting for text and voice to be selected"}
     </Row>
     <Divider orientation="left">Available Voices</Divider>
@@ -72,79 +68,3 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
     </>
   );
 }
-
-/*
-function generateColumns(textInput: string, isLoading: boolean, handleGenerateVoice: (record: ElevenLabs.Voice) => Promise<void>): TableColumnsType<ElevenLabs.Voice> {
-  return [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      width: 100,
-    },
-    {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
-      width: 100,
-    },
-    {
-      title: "Labels",
-      children: [
-        {
-          title: "Gender",
-          dataIndex: ["labels", "gender"],
-          width: 60
-        },
-        {
-          title: "Age",
-          dataIndex: ["labels", "age"],
-          width: 60
-        },
-        {
-          title: "Accent",
-          dataIndex: ["labels", "accent"],
-          width: 60
-        },
-        {
-          title: "Description",
-          dataIndex: ["labels", "description"],
-          width: 60
-        },
-        {
-          title: "Use case",
-          dataIndex: ["labels", "use_case"],
-          width: 60
-        },
-      ]
-    },
-    {
-      title: "Preview",
-      dataIndex: "preview_url",
-      key: "preview_url",
-      width: 50,
-      render: (_, record) => {
-        return (
-          <audio controls>
-            <source src={`${record.preview_url}`} type="audio/mp3" />
-          </audio>);
-      }
-    },
-    {
-      title: "Generate",
-      width: 30,
-      render: (_, record) => {
-        return (
-          textInput?.length > 0 && (
-            <Spin size="small" spinning={isLoading}>
-              <Button
-                type="primary"
-                icon={<DownloadOutlined />}
-                onClick={() => handleGenerateVoice(record)} />
-            </Spin>)
-        );
-      }
-    },
-  ];
-}
-*/
