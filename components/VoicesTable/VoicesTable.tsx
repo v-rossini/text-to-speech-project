@@ -16,15 +16,10 @@ interface VoiceTableProps {
 
 const { TextArea } = Input;
 
-
-// Main component function
 export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
-  // State for tracking form submission status
-
   const [textInput, setTextInput] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [blob, setBlob] = useState<PutBlobResult | null>(null)
-
 
   const columns: TableColumnsType<ElevenLabs.Voice> = [
     {title: "Name",
@@ -63,7 +58,7 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
      render: (_, record) => {
       return (
             <audio controls>
-              <source src={`${record.preview_url}`} type="audio/mpeg" />
+              <source src={`${record.preview_url}`} type="audio/mp3" />
             </audio>)
      }
     },
@@ -87,7 +82,6 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
     setIsLoading(true);
 
     try {
-      // Make a POST request to the server's API endpoint to generate audio
       const response = await fetch("/api/generate-audio-url", {
         method: "POST",
         headers: {
@@ -98,17 +92,11 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
           voiceId: record.voice_id,
         }),
       });
-
-      console.log("response: ", response)
-
       
       const newBlob = (await response.json()) as PutBlobResult;
-      console.log("newBlob:", newBlob)
 
       setBlob(newBlob);
-
       setIsLoading(false);
-
     } catch (error) {
 
       setIsLoading(false);
@@ -123,14 +111,19 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
       <TextArea
         rows={2}
         size="small"
-        style={{width: 300}}
+        style={{width: 600}}
         onChange={(t) => {setTextInput(t.target.value)} }/>
     </Row>
+       <p>{blob? blob.url : null}</p>
      <Row>
       {blob ? (
-      <audio controls>
-      <source id="audioSource" type="audio/flac" src={blob.url} />
-    </audio>
+      <>
+        <div>
+          <audio controls>
+            <source id="audioSource" type="audio/mp3" src={blob?.url} />
+          </audio>
+        </div>
+      </>
     ) : "waiting for text and voice to be selected"}
     </Row>
     <Divider orientation="left">Available Voices</Divider>

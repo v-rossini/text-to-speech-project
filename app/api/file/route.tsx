@@ -22,10 +22,3 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   return NextResponse.json(blob);
 }
-
-// The next lines are required for Pages API Routes only
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
