@@ -1,7 +1,5 @@
 "use client"
 
-import { GenerateSoundForm } from "@/components/GenerateSoundForm";
-import Loader from "@/components/Loader";
 import { VoicesTable } from "@/components/VoicesTable/VoicesTable";
 import { ElevenLabs } from "elevenlabs";
 import { useEffect, useState } from "react";
@@ -32,6 +30,8 @@ export default function TextToSpeechView() {
         dataSource: voiceData.voices
       })
       setIsLoading(false);
+
+      console.log(voiceData.voices)
     }
 
     callback()
@@ -49,25 +49,7 @@ export default function TextToSpeechView() {
           {/* Render the form component for generating sound */}
           <Spin size="large" spinning={isLoading} delay={300}>
             <VoicesTable {...voices} />
-            <GenerateSoundForm />
         </Spin>
-      </div>
-      <div className="w-full md:w-2/3 p-4 bg-gray-200 h-screen">
-        <div className="h-full flex justify-center items-center">
-          {isLoading ? (
-            // Show loader when fetching audio data
-            <Loader />
-          ) : (
-            // Display audio player when audio is available
-            <>
-              {audioUrl && (
-                <audio controls>
-                  <source id="audioSource" type="audio/flac" src={audioUrl!} />
-                </audio>
-              )}
-            </>
-          )}
-        </div>
       </div>
     </div>
   );

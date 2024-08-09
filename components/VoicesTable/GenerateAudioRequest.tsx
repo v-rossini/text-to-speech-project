@@ -1,4 +1,4 @@
-export interface GenerateSoundRequest {
+export interface GenerateAudioRequest {
     voiceId: string,
     text: string,
 }

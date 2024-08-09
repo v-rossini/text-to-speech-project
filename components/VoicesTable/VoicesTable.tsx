@@ -1,9 +1,8 @@
 "use client";
 
 // Import necessary modules and components
-import { Button, Col, Divider, Input, Row, Table, TableColumnsType } from "antd";
+import { Button, Col, Divider, Input, Row, Spin, Table, TableColumnsType } from "antd";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import React, { ReactElement, useState } from "react";
 import { ElevenLabs } from "elevenlabs";
 import { Voice } from "elevenlabs/api";
@@ -23,7 +22,7 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
 
   const [textInput, setTextInput] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [audioUrl, setAudioUrl] = useState<string>("https://storage.googleapis.com/eleven-public-prod/…3GoZ742B/3f4bde72-cc48-40dd-829f-57fbf906f4d7.mp3")
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
 
   const columns: TableColumnsType<ElevenLabs.Voice> = [
@@ -71,34 +70,74 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
       width: 30,
       render: (_, record) => {
        return (
-        textInput?.length > 0 && (<Button 
+        textInput?.length > 0 && (
+        <Spin size="small" spinning={isLoading}>  
+          <Button 
           type="primary" 
           icon={<DownloadOutlined />}
-          onClick={() => handleGenerateVoice(record)} />)       
+          onClick={() => handleGenerateVoice(record)} />
+        </Spin>  )       
       )
       }
      },
   ]
 
-  const handleGenerateVoice = (record: ElevenLabs.Voice) => {
+  const handleGenerateVoice = async (record: ElevenLabs.Voice) => {
+    setIsLoading(true);
 
-    console.log({
-      voiceId: record.voice_id,
-      preview: record.preview_url,
-      textInput: textInput,
-    })
+    try {
+      // Make a POST request to the server's API endpoint to generate audio
+      const response = await fetch("/api/generate-audio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text:  textInput,
+          voiceId: record.voice_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch audio data.");
+      }
+      console.log("response: ", response)
+
+      // Get the audio data as an ArrayBuffer
+
+      const data = await response.arrayBuffer();
+
+      // Convert ArrayBuffer to Blob and create a URL for the audio
+      const blob = new Blob([data], { type: "audio/mpeg" });
+      const audioUrl = URL.createObjectURL(blob);
+      setAudioUrl(audioUrl);
+
+      setIsLoading(false);
+
+    } catch (error) {
+
+      setIsLoading(false);
+
+    }
+
   }
 
   return (
     <>
-    <TextArea
+    <Row>
+      <TextArea
         rows={2}
         size="small"
         style={{width: 300}}
-        onChange={(t) => {setTextInput(t.target.value); console.log(textInput)} }/>
-    <audio controls>
+        onChange={(t) => {setTextInput(t.target.value)} }/>
+    </Row>
+     <Row>
+      {audioUrl ? (
+      <audio controls>
       <source id="audioSource" type="audio/flac" src={audioUrl!} />
     </audio>
+    ) : "waiting for text and voice to be selected"}
+    </Row>
     <Divider orientation="left">Available Voices</Divider>
     <Table dataSource={dataSource} columns={columns}/>
     </>
