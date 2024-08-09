@@ -8,6 +8,7 @@ import { ElevenLabs } from "elevenlabs";
 import { Voice } from "elevenlabs/api";
 import { text } from "stream/consumers";
 import { DownloadOutlined } from '@ant-design/icons';
+import { PutBlobResult } from "@vercel/blob";
 
 interface VoiceTableProps {
   dataSource: ElevenLabs.Voice[]
@@ -22,7 +23,7 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
 
   const [textInput, setTextInput] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [blob, setBlob] = useState<PutBlobResult | null>(null)
 
 
   const columns: TableColumnsType<ElevenLabs.Voice> = [
@@ -87,7 +88,7 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
 
     try {
       // Make a POST request to the server's API endpoint to generate audio
-      const response = await fetch("/api/generate-audio", {
+      const response = await fetch("/api/generate-audio-url", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,19 +99,13 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch audio data.");
-      }
       console.log("response: ", response)
 
-      // Get the audio data as an ArrayBuffer
+      
+      const newBlob = (await response.json()) as PutBlobResult;
+      console.log("newBlob:", newBlob)
 
-      const data = await response.arrayBuffer();
-
-      // Convert ArrayBuffer to Blob and create a URL for the audio
-      const blob = new Blob([data], { type: "audio/mpeg" });
-      const audioUrl = URL.createObjectURL(blob);
-      setAudioUrl(audioUrl);
+      setBlob(newBlob);
 
       setIsLoading(false);
 
@@ -132,9 +127,9 @@ export function VoicesTable({ dataSource }: VoiceTableProps): ReactElement {
         onChange={(t) => {setTextInput(t.target.value)} }/>
     </Row>
      <Row>
-      {audioUrl ? (
+      {blob ? (
       <audio controls>
-      <source id="audioSource" type="audio/flac" src={audioUrl!} />
+      <source id="audioSource" type="audio/flac" src={blob.url} />
     </audio>
     ) : "waiting for text and voice to be selected"}
     </Row>

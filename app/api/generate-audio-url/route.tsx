@@ -1,9 +1,12 @@
 import { ElevenLabsClient } from "elevenlabs";
 import { client } from "../client/config";
 import { TextToSpeechRequest } from "elevenlabs/api";
+import { put } from '@vercel/blob';
+import { v4 } from 'uuid';
+import { NextResponse } from "next/server";
 
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   const requestBody = await request.json();
 
   if (!requestBody.voiceId) {
@@ -20,7 +23,9 @@ export async function POST(request: Request) {
 
   const voiceId = requestBody.voiceId;
   const text = requestBody.text;
-  
+  const uuid: string = v4()
+  const ElevenLabsUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`
+
   const t2sRequest: TextToSpeechRequest = {text: text, model_id: "eleven_multilingual_v2",}
 
   console.log("0: ", t2sRequest)
@@ -28,16 +33,26 @@ export async function POST(request: Request) {
   const response = await client.textToSpeech.convert(voiceId, t2sRequest)
 
   console.log("1: ", response)
+/*
+  const response2 = await fetch(ElevenLabsUrl, {
+    method: "POST",
+    body: JSON.stringify(t2sRequest)})
+    */
+  
 
   const audioData = await response.read()
- 
+  const jsBlob = new Blob([audioData], { type: "audio/mpeg" });
 
- console.log("2: ", audioData)
+  //const audioData2 = await response2.arrayBuffer()
 
-  return new Response(audioData,{
-    headers:{
-        "Content-Type":"audio/mpeg"
-    }
-  })
+  console.log("2: ", audioData)
+
+  const blob = await put(`${uuid}.mp3`, jsBlob, {
+    access: 'public',
+  });
+
+  console.log("blob: ", blob)
+
+  return NextResponse.json(blob);
 
 }
