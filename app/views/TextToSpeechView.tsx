@@ -4,7 +4,7 @@ import { VoicesTable } from "@/components/VoicesTable/VoicesTable";
 import { ElevenLabs } from "elevenlabs";
 import { useEffect, useState } from "react";
 import { GET as getVoices } from "../api/get-voices/route";
-import { VoicesTableProps } from "@/components/VoicesTable/VoicesTableProps";
+import { VoicesTableProps } from "@/components/VoicesTable/interfaces/VoicesTableProps";
 import { Spin } from "antd";
 
 

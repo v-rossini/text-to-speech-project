@@ -1,4 +1,4 @@
-import { ElevenLabs, ElevenLabsClient } from "elevenlabs";
+import { ElevenLabs } from "elevenlabs";
 import { client } from "../client/config";
 
 
